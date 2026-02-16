@@ -1,0 +1,166 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rafee AI Pro Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600;800&display=swap');
+        
+        body {
+            background-color: #020202;
+            color: #e2e8f0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            font-size: 13px;
+        }
+        
+        .pro-bg-gradient {
+            background: radial-gradient(circle at 50% 0%, #0c111d 0%, #020202 100%);
+        }
+
+        .glass-panel {
+            background: rgba(14, 14, 14, 0.82);
+            backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.9);
+        }
+
+        .glossy-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            box-shadow: 0 15px 40px -10px rgba(37, 99, 235, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+        }
+
+        .glossy-secondary {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        /* Improved Rainbow Ring */
+        @keyframes rainbow-border {
+            0% { border-color: #3b82f6 #6366f1 #8b5cf6 #d946ef; filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4)); }
+            33% { border-color: #d946ef #3b82f6 #6366f1 #8b5cf6; filter: drop-shadow(0 0 15px rgba(217, 70, 239, 0.4)); }
+            66% { border-color: #8b5cf6 #d946ef #3b82f6 #6366f1; filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.4)); }
+            100% { border-color: #3b82f6 #6366f1 #8b5cf6 #d946ef; filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4)); }
+        }
+
+        .processing-ring {
+            border: 6px solid transparent;
+            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite, rainbow-border 4s ease-in-out infinite;
+        }
+
+        .rf-glow {
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(59, 130, 246, 0.9);
+            animation: rf-pulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes rf-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.95; }
+            50% { transform: scale(1.1); opacity: 1; filter: brightness(1.4); }
+        }
+
+        /* Galaxy Transition Styles */
+        .galaxy-container {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            background: radial-gradient(circle at center, #0a0f2b 0%, #000000 100%);
+            z-index: 5000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .starfield-dense {
+            position: absolute;
+            inset: -50%;
+            background-image: 
+                radial-gradient(1.5px 1.5px at 20px 30px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 150px 150px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 280px 70px, #fff, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 400px 400px;
+            animation: stars-move 120s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes stars-move { 
+            from { transform: scale(1) rotate(0deg); } 
+            to { transform: scale(2) rotate(10deg); } 
+        }
+
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(1px);
+            box-shadow: inset -20px -20px 50px rgba(0,0,0,0.9);
+        }
+
+        .planet-1 {
+            width: 300px; height: 300px;
+            background: radial-gradient(circle at 30% 30%, #3b82f6, #000);
+            top: -100px; left: -100px;
+            animation: planet-drift 20s linear infinite alternate;
+        }
+
+        .planet-2 {
+            width: 150px; height: 150px;
+            background: radial-gradient(circle at 30% 30%, #6366f1, #000);
+            bottom: 10%; right: -50px;
+            animation: planet-drift 15s linear infinite alternate-reverse;
+        }
+
+        @keyframes planet-drift {
+            from { transform: translate(0, 0); }
+            to { transform: translate(50px, 30px); }
+        }
+
+        .warp-line {
+            position: absolute;
+            height: 1.5px;
+            background: linear-gradient(90deg, transparent, #3b82f6, #fff, #3b82f6, transparent);
+            width: 200px;
+            opacity: 0.2;
+            animation: warp-speed 0.8s linear infinite;
+        }
+
+        @keyframes warp-speed {
+            from { transform: translateX(-150vw) scaleX(1); }
+            to { transform: translateX(150vw) scaleX(2); }
+        }
+
+        .image-glow {
+            filter: drop-shadow(0 0 50px rgba(59, 130, 246, 0.25));
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #020202; }
+        ::-webkit-scrollbar-thumb { background: #1e40af; border-radius: 10px; }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.40.0"
+  }
+}
+</script>
+</head>
+<body class="pro-bg-gradient">
+    <div id="root"></div>
+</body>
+</html>
