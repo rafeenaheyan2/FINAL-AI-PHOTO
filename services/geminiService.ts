@@ -3,22 +3,22 @@ import { GoogleGenAI } from "@google/genai";
 
 /**
  * এআই এর মাধ্যমে ছবি এডিট করার ফাংশন।
- * এটি ফাংশনের ভেতরে ইন্সট্যান্স তৈরি করে যাতে টপ-লেভেল 'process' এরর না হয়।
+ * এটি ব্রাউজারের গ্লোবাল প্রসেস অবজেক্ট চেক করে এপিআই কী নেয়।
  */
 export const editImageWithGemini = async (
   base64Image: string, 
   instruction: string
 ): Promise<string> => {
-  // এপিআই কী চেক করা হচ্ছে
+  // এপিআই কী চেক করা হচ্ছে (ব্রাউজার ফ্রেন্ডলি উপায়ে)
   let apiKey = "";
   try {
-    apiKey = process.env.API_KEY || "";
+    apiKey = (window as any).process?.env?.API_KEY || (process as any)?.env?.API_KEY || "";
   } catch (e) {
-    console.error("Process object not found, usually this happens in raw browser environments.");
+    console.warn("Process.env access failed, using fallback.");
   }
 
   if (!apiKey) {
-    throw new Error("API Key পাওয়া যায়নি। দয়া করে পরিবেশের সেটিংস চেক করুন।");
+    throw new Error("API Key পাওয়া যায়নি। দয়া করে সেটিংস চেক করুন।");
   }
 
   // রিকোয়েস্টের সময় এআই ইন্সট্যান্স তৈরি করা হচ্ছে

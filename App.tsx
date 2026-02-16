@@ -15,7 +15,7 @@ const SelectionPanel: React.FC<{
 }> = ({ title, show, onClose, children }) => {
   if (!show) return null;
   return (
-    <div className="absolute inset-0 z-50 bg-[#020202]/fb backdrop-blur-3xl animate-[fadeIn_0.3s_ease-out] flex flex-col p-6 rounded-[50px] overflow-hidden">
+    <div className="absolute inset-0 z-50 bg-[#020202]/95 backdrop-blur-3xl animate-[fadeIn_0.3s_ease-out] flex flex-col p-6 rounded-[50px] overflow-hidden">
       <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
         <h3 className="text-lg font-black text-white uppercase tracking-tighter">{title}</h3>
         <button onClick={onClose} className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center transition-all">
@@ -34,7 +34,7 @@ const HelpModal: React.FC<{
   onClose: () => void;
 }> = ({ show, onClose }) => {
   if (!show) return null;
-  const [messages, setMessages] = useState([{ role: 'ai', text: 'স্বাগতম! আমি রাফী এআই, আপনাকে কিভাবে সাহায্য করতে পারি?' }]);
+  const [messages, setMessages] = useState([{ role: 'ai' as const, text: 'স্বাগতম! আমি রাফী এআই, আপনাকে কিভাবে সাহায্য করতে পারি?' }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -50,15 +50,15 @@ const HelpModal: React.FC<{
     setLoading(true);
 
     try {
-      const apiKey = process.env.API_KEY || "";
+      const apiKey = (window as any).process?.env?.API_KEY || "";
       const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: userText,
-        config: { systemInstruction: "You are Rafee AI assistant. Help users with photo editing tasks." }
       });
       setMessages(prev => [...prev, { role: 'ai', text: response.text || "দুঃখিত, আমি এটি বুঝতে পারছি না।" }]);
-    } catch {
+    } catch (err) {
+      console.error(err);
       setMessages(prev => [...prev, { role: 'ai', text: "সার্ভার এখন কিছুটা ব্যস্ত।" }]);
     } finally {
       setLoading(false);
@@ -141,7 +141,7 @@ const App: React.FC = () => {
             <i className="fa-solid fa-shuttle-space text-4xl text-white -rotate-45 animate-pulse"></i>
           </div>
           <div className="text-center">
-            <h2 className="text-3xl font-black text-white tracking-widest uppercase">Initializing Pro Studio</h2>
+            <h2 className="text-3xl font-black text-white uppercase tracking-widest">Initializing Pro Studio</h2>
             <p className="text-[10px] text-blue-500 font-bold tracking-[0.6em] mt-2">LINKING NEURAL NETWORKS</p>
           </div>
         </div>
