@@ -6,7 +6,7 @@ import { GlossyButton } from './components/GlossyButton';
 import { editImageWithGemini } from './services/geminiService';
 import { GoogleGenAI } from "@google/genai";
 
-// Separate HelpModal component to prevent remount issues
+// Separate HelpModal component
 interface HelpModalProps {
   show: boolean;
   onClose: () => void;
@@ -41,21 +41,6 @@ const HelpModal: React.FC<HelpModalProps> = ({
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide">
-          <a href="https://shorturl.at/pQnkD" target="_blank" rel="noopener noreferrer" className="block p-5 rounded-3xl bg-blue-600/10 border border-blue-500/20 hover:border-blue-500 transition-all group">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <i className="fa-solid fa-play text-blue-400 text-xs"></i>
-                </div>
-                <div className="text-left">
-                  <p className="text-[10px] font-black text-white uppercase">Watch Guide</p>
-                  <p className="text-[8px] text-slate-500 uppercase tracking-widest">Documentation Video</p>
-                </div>
-              </div>
-              <i className="fa-solid fa-chevron-right text-[10px] text-slate-600 group-hover:translate-x-1 transition-transform"></i>
-            </div>
-          </a>
-
           <div className="space-y-3">
             <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest px-2">Ask Anything</p>
             <div className="bg-black/60 border border-white/5 rounded-3xl p-5 min-h-[220px] flex flex-col">
@@ -84,10 +69,10 @@ const HelpModal: React.FC<HelpModalProps> = ({
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   placeholder="কি জানতে চান?..." 
-                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-[10px] focus:border-blue-500 outline-none"
+                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-[10px] focus:border-blue-500 outline-none text-white"
                 />
                 <button type="submit" className="w-10 h-10 glossy-primary rounded-xl flex items-center justify-center flex-shrink-0">
-                  <i className="fa-solid fa-paper-plane text-[10px]"></i>
+                  <i className="fa-solid fa-paper-plane text-[10px] text-white"></i>
                 </button>
               </form>
             </div>
@@ -133,6 +118,29 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ confirmModal, onClose }) =>
   );
 };
 
+// Separate SelectionPanel component to fix children typing issues
+interface SelectionPanelProps {
+  title: string;
+  show: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}
+
+const SelectionPanel: React.FC<SelectionPanelProps> = ({ title, show, onClose, children }) => {
+  if (!show) return null;
+  return (
+    <div className="absolute inset-0 z-50 bg-black/90 backdrop-blur-3xl animate-[fadeIn_0.3s_ease-out] flex flex-col p-8 overflow-y-auto scrollbar-hide">
+      <div className="flex justify-between items-center mb-10">
+        <h3 className="text-2xl font-black text-white uppercase tracking-widest">{title}</h3>
+        <button onClick={onClose} className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all">
+          <i className="fa-solid fa-times text-slate-400"></i>
+        </button>
+      </div>
+      {children}
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   const [state, setState] = useState<ImageState>({
     original: null,
@@ -148,7 +156,6 @@ const App: React.FC = () => {
   const [clothingTab, setClothingTab] = useState<'male' | 'female'>('male');
   const [proEditPrompt, setProEditPrompt] = useState('');
   
-  // Help & Chatbot State
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [chatMessages, setChatMessages] = useState<{role: 'user' | 'ai', text: string}[]>([
     {role: 'ai', text: 'স্বাগতম! আমি রাফী এআই অ্যাসিস্ট্যান্ট। আমি আপনাকে এই ওয়েবসাইটটি ব্যবহার করতে সাহায্য করতে পারি।'}
@@ -157,7 +164,6 @@ const App: React.FC = () => {
   const [isChatting, setIsChatting] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Custom Confirmation Modal State
   const [confirmModal, setConfirmModal] = useState<{
     show: boolean;
     title: string;
@@ -203,6 +209,8 @@ const App: React.FC = () => {
 
   const handleAction = async (prompt: string) => {
     if (!state.original) return;
+    setShowDresses(false);
+    setShowFilters(false);
     setState(prev => ({ ...prev, isProcessing: true, error: null }));
     try {
       const result = await editImageWithGemini(state.original, prompt);
@@ -222,8 +230,8 @@ const App: React.FC = () => {
     setIsChatting(true);
 
     try {
-      // Create new instance strictly before use to avoid top-level ReferenceErrors
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+      // Fix: Use process.env.API_KEY directly as per guidelines.
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: userMsg,
@@ -294,7 +302,7 @@ const App: React.FC = () => {
             </div>
             {state.original && (
               <GlossyButton onClick={handleExport} className="px-10 py-3 bg-blue-600 text-[10px] md:text-[11px] shadow-2xl shadow-blue-500/30">
-                <i className="fa-solid fa-cloud-arrow-down mr-3"></i> Final Export
+                <i className="fa-solid fa-cloud-arrow-down mr-3 text-white"></i> Final Export
               </GlossyButton>
             )}
          </nav>
@@ -333,7 +341,37 @@ const App: React.FC = () => {
             </aside>
 
             <main className="lg:col-span-9 flex flex-col space-y-6">
-               <div className="flex-1 glass-panel rounded-[60px] p-2 studio-viewer relative overflow-hidden flex flex-col">
+               <div className="flex-1 glass-panel rounded-[60px] p-2 studio-viewer relative overflow-hidden flex flex-col min-h-[500px]">
+                  <SelectionPanel title="Neural Wardrobe" show={showDresses} onClose={() => setShowDresses(false)}>
+                    <div className="flex gap-4 mb-8">
+                       <button onClick={() => setClothingTab('male')} className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${clothingTab === 'male' ? 'bg-blue-600 text-white' : 'bg-white/5 text-slate-500'}`}>Male</button>
+                       <button onClick={() => setClothingTab('female')} className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${clothingTab === 'female' ? 'bg-pink-600 text-white' : 'bg-white/5 text-slate-500'}`}>Female</button>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                      {CLOTHING_OPTIONS.filter(o => o.gender === clothingTab).map(opt => (
+                        <button key={opt.id} onClick={() => handleAction(opt.prompt)} className="group relative rounded-2xl overflow-hidden aspect-[3/4] border border-white/10 hover:border-blue-500 transition-all bg-black/40">
+                          <img src={opt.thumbnail} className="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity" />
+                          <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black to-transparent">
+                            <p className="text-[9px] font-black text-white uppercase text-center">{opt.name}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </SelectionPanel>
+
+                  <SelectionPanel title="Cinematic Grades" show={showFilters} onClose={() => setShowFilters(false)}>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
+                      {FILTER_OPTIONS.map(filter => (
+                        <button key={filter.id} onClick={() => handleAction(filter.prompt)} className="flex flex-col items-center gap-4 p-8 rounded-[35px] bg-white/5 border border-white/5 hover:border-indigo-500 hover:bg-indigo-500/10 transition-all group">
+                          <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i className={`fa-solid ${filter.icon} text-xl text-indigo-400`}></i>
+                          </div>
+                          <span className="text-[10px] font-black text-white uppercase tracking-widest">{filter.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </SelectionPanel>
+
                   {state.error && (
                     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[10] px-6 py-3 bg-red-600/20 border border-red-500/40 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-full backdrop-blur-xl">
                       Error: {state.error}
@@ -420,13 +458,13 @@ const App: React.FC = () => {
             message:"Initialize Advanced Synthesis Core?", 
             onConfirm: () => startProModeTransition()
           })}
-          className="flex items-center gap-5 px-14 py-5 rounded-3xl font-black text-[13px] tracking-[0.2em] uppercase transition-all duration-700 bg-slate-900 border border-white/10 hover:border-blue-500 hover:bg-blue-600/10 group shadow-2xl active:scale-95"
+          className="flex items-center gap-5 px-14 py-5 rounded-3xl font-black text-[13px] tracking-[0.2em] uppercase transition-all duration-700 bg-slate-900 border border-white/10 hover:border-blue-500 hover:bg-blue-600/10 group shadow-2xl active:scale-95 text-white"
         >
           <i className="fa-solid fa-shuttle-space group-hover:animate-bounce"></i> Studio Mode
         </button>
       </header>
 
-      <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 relative">
         <div className="lg:col-span-4 space-y-8 animate-[slideUp_1s_ease-out]">
           {!state.original ? (
             <div className="relative group overflow-hidden glass-panel p-12 rounded-[50px] border-dashed border-2 border-white/10 flex flex-col items-center justify-center hover:border-blue-500 transition-all duration-700 min-h-[500px] shadow-2xl">
@@ -456,9 +494,22 @@ const App: React.FC = () => {
           )}
         </div>
 
-        <div className="lg:col-span-8">
+        <div className="lg:col-span-8 overflow-hidden rounded-[65px] relative">
           {state.original && (
-            <div className="glass-panel rounded-[65px] p-1 overflow-hidden min-h-[600px] flex flex-col shadow-2xl border-white/5 animate-[zoomIn_0.6s_ease-out] relative">
+            <div className="glass-panel rounded-[65px] p-1 overflow-hidden min-h-[600px] flex flex-col shadow-2xl border-white/5 animate-[zoomIn_0.6s_ease-out] relative h-full">
+              <SelectionPanel title="Select Attire" show={showDresses} onClose={() => setShowDresses(false)}>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {CLOTHING_OPTIONS.slice(0, 6).map(opt => (
+                    <button key={opt.id} onClick={() => handleAction(opt.prompt)} className="group relative rounded-3xl overflow-hidden aspect-video border border-white/10 hover:border-blue-500 transition-all">
+                      <img src={opt.thumbnail} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all" />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center p-4">
+                        <p className="text-[10px] font-black text-white uppercase tracking-widest text-center">{opt.name}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </SelectionPanel>
+
               {state.error && (
                 <div className="absolute top-8 left-1/2 -translate-x-1/2 z-[10] px-6 py-3 bg-red-600/20 border border-red-500/40 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-full backdrop-blur-xl">
                   {state.error}
