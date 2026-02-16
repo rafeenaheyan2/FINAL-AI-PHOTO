@@ -62,14 +62,14 @@ const HelpModal: React.FC<HelpModalProps> = ({
               <div className="flex-1 space-y-3 overflow-y-auto pr-1 max-h-[160px] scrollbar-hide">
                 {chatMessages.map((msg, i) => (
                   <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-[9.5px] ${msg.role === 'user' ? 'chat-bubble-user text-slate-300' : 'chat-bubble-ai text-white shadow-xl'}`}>
+                    <div className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-[9.5px] ${msg.role === 'user' ? 'bg-blue-600/20 text-slate-300' : 'bg-white/10 text-white shadow-xl'}`}>
                       {msg.text}
                     </div>
                   </div>
                 ))}
                 {isChatting && (
                   <div className="flex justify-start">
-                    <div className="chat-bubble-ai px-4 py-2 rounded-2xl flex gap-1 items-center">
+                    <div className="bg-white/10 px-4 py-2 rounded-2xl flex gap-1 items-center">
                       <span className="w-1 h-1 bg-white rounded-full animate-bounce"></span>
                       <span className="w-1 h-1 bg-white rounded-full animate-bounce [animation-delay:0.2s]"></span>
                       <span className="w-1 h-1 bg-white rounded-full animate-bounce [animation-delay:0.4s]"></span>
@@ -222,6 +222,7 @@ const App: React.FC = () => {
     setIsChatting(true);
 
     try {
+      // Create new instance strictly before use to avoid top-level ReferenceErrors
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
@@ -333,6 +334,11 @@ const App: React.FC = () => {
 
             <main className="lg:col-span-9 flex flex-col space-y-6">
                <div className="flex-1 glass-panel rounded-[60px] p-2 studio-viewer relative overflow-hidden flex flex-col">
+                  {state.error && (
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[10] px-6 py-3 bg-red-600/20 border border-red-500/40 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-full backdrop-blur-xl">
+                      Error: {state.error}
+                    </div>
+                  )}
                   {!state.original ? (
                     <div className="flex-1 flex flex-col items-center justify-center p-20 text-center">
                        <input type="file" id="pro-upload" className="hidden" onChange={handleFileUpload} accept="image/*" />
@@ -362,14 +368,14 @@ const App: React.FC = () => {
                   )}
                   
                   {state.original && !state.isProcessing && (
-                    <div className="p-10 flex justify-between items-center bg-black/60 backdrop-blur-3xl border-t border-white/5">
-                       <div className="flex gap-4">
-                          <button onClick={() => { setShowDresses(!showDresses); setShowFilters(false); }} className={`px-12 py-5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${showDresses ? 'bg-blue-600 text-white shadow-xl' : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white'}`}>Wardrobe</button>
-                          <button onClick={() => { setShowFilters(!showFilters); setShowDresses(false); }} className={`px-12 py-5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${showFilters ? 'bg-indigo-600 text-white shadow-xl' : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white'}`}>Grades</button>
+                    <div className="p-10 flex flex-wrap gap-4 justify-between items-center bg-black/60 backdrop-blur-3xl border-t border-white/5">
+                       <div className="flex flex-wrap gap-4">
+                          <button onClick={() => { setShowDresses(!showDresses); setShowFilters(false); }} className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${showDresses ? 'bg-blue-600 text-white shadow-xl' : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white'}`}>Wardrobe</button>
+                          <button onClick={() => { setShowFilters(!showFilters); setShowDresses(false); }} className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${showFilters ? 'bg-indigo-600 text-white shadow-xl' : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white'}`}>Grades</button>
                        </div>
-                       <div className="flex gap-4">
-                          <button onClick={() => setState(prev => ({ ...prev, edited: prev.original }))} className="px-12 py-5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-slate-900 border border-white/5 text-slate-500 hover:text-white">Restore</button>
-                          <button onClick={handleReselect} className="px-12 py-5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-red-500/10 border border-red-500/20 text-red-500/50 hover:text-red-500">Drop</button>
+                       <div className="flex flex-wrap gap-4">
+                          <button onClick={() => setState(prev => ({ ...prev, edited: prev.original }))} className="px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-slate-900 border border-white/5 text-slate-500 hover:text-white">Restore</button>
+                          <button onClick={handleReselect} className="px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-red-500/10 border border-red-500/20 text-red-500/50 hover:text-red-500">Drop</button>
                        </div>
                     </div>
                   )}
@@ -452,7 +458,12 @@ const App: React.FC = () => {
 
         <div className="lg:col-span-8">
           {state.original && (
-            <div className="glass-panel rounded-[65px] p-1 overflow-hidden min-h-[600px] flex flex-col shadow-2xl border-white/5 animate-[zoomIn_0.6s_ease-out]">
+            <div className="glass-panel rounded-[65px] p-1 overflow-hidden min-h-[600px] flex flex-col shadow-2xl border-white/5 animate-[zoomIn_0.6s_ease-out] relative">
+              {state.error && (
+                <div className="absolute top-8 left-1/2 -translate-x-1/2 z-[10] px-6 py-3 bg-red-600/20 border border-red-500/40 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-full backdrop-blur-xl">
+                  {state.error}
+                </div>
+              )}
               {state.isProcessing ? (
                 <div className="flex-1 flex flex-col items-center justify-center">
                    <div className="w-20 h-20 border-t-2 border-blue-500 rounded-full animate-spin mb-8 shadow-[0_0_40px_rgba(59,130,246,0.35)]"></div>
@@ -460,8 +471,8 @@ const App: React.FC = () => {
                    <p className="text-[11px] text-slate-600 mt-2 uppercase tracking-widest font-black animate-pulse">Analyzing Neural Pixels</p>
                 </div>
               ) : (
-                <div className="flex-1 flex flex-col p-12">
-                  <div className="flex justify-between items-center mb-10">
+                <div className="flex-1 flex flex-col p-8 md:p-12">
+                  <div className="flex flex-col sm:flex-row justify-between items-center mb-10 gap-4">
                      <div className="flex items-center gap-3 px-5 py-2.5 bg-white/5 rounded-full border border-white/10 shadow-inner">
                        <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></span>
                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Preview</span>

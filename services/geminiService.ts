@@ -9,6 +9,7 @@ export const editImageWithGemini = async (
   base64Image: string, 
   instruction: string
 ): Promise<string> => {
+  // Always initialize right before use to ensure the most current API key is used
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
   
   const base64Data = base64Image.split(',')[1];
