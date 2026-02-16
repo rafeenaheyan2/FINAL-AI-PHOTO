@@ -2,20 +2,26 @@
 import { GoogleGenAI } from "@google/genai";
 
 /**
- * Edits an image using Gemini 2.5 Flash Image.
- * Initialization is done inside the function to prevent crashes during module load.
+ * এআই এর মাধ্যমে ছবি এডিট করার ফাংশন।
+ * এটি ফাংশনের ভেতরে ইন্সট্যান্স তৈরি করে যাতে টপ-লেভেল 'process' এরর না হয়।
  */
 export const editImageWithGemini = async (
   base64Image: string, 
   instruction: string
 ): Promise<string> => {
-  // Check for API key presence to avoid immediate crash
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    throw new Error("API Key পাওয়া যায়নি। দয়া করে সেটিংস চেক করুন।");
+  // এপিআই কী চেক করা হচ্ছে
+  let apiKey = "";
+  try {
+    apiKey = process.env.API_KEY || "";
+  } catch (e) {
+    console.error("Process object not found, usually this happens in raw browser environments.");
   }
 
-  // Initialize strictly inside the function
+  if (!apiKey) {
+    throw new Error("API Key পাওয়া যায়নি। দয়া করে পরিবেশের সেটিংস চেক করুন।");
+  }
+
+  // রিকোয়েস্টের সময় এআই ইন্সট্যান্স তৈরি করা হচ্ছে
   const ai = new GoogleGenAI({ apiKey });
   
   const base64Data = base64Image.split(',')[1];
@@ -29,9 +35,10 @@ export const editImageWithGemini = async (
   };
 
   const textPart = {
-    text: `TASK: PROFESSIONAL IMAGE EDITING. 
-    Maintain face identity 100%. 
-    Instructions: ${instruction}`
+    text: `TASK: PROFESSIONAL PHOTO EDITING.
+    Identity Preservation: High.
+    Requirement: ${instruction}
+    Final Output: Return only the processed image.`
   };
 
   try {
@@ -41,7 +48,7 @@ export const editImageWithGemini = async (
     });
 
     const candidate = response.candidates?.[0];
-    if (!candidate) throw new Error("AI থেকে কোনো রেসপন্স পাওয়া যায়নি।");
+    if (!candidate) throw new Error("এআই থেকে কোনো উত্তর পাওয়া যায়নি।");
 
     for (const part of candidate.content.parts) {
       if (part.inlineData) {
@@ -49,9 +56,9 @@ export const editImageWithGemini = async (
       }
     }
 
-    throw new Error("AI ছবি তৈরি করতে পারেনি।");
+    throw new Error("এআই ছবি তৈরি করতে ব্যর্থ হয়েছে।");
   } catch (error: any) {
-    console.error("Gemini Error:", error);
-    throw new Error(error.message || "এডিটিং ব্যর্থ হয়েছে।");
+    console.error("Gemini Edit Error:", error);
+    throw new Error(error.message || "ছবি প্রসেসিং ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
   }
 };
